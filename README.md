@@ -253,7 +253,148 @@ graph TD
     F -->|External Table| G[(Synapse Serverless SQL Pool)]
 
     G -->|SQL Query| H[Power BI / Reporting Dashboard]
+
 ```
+```mermaid
+flowchart LR
+
+%% =====================================================
+%% 1. DATA SOURCES
+%% =====================================================
+
+subgraph Sources["1️⃣ Data Sources"]
+    direction TB
+
+    API["🌐 Mock Retail REST API<br/>GitHub JSON"]:::source
+    ExtFiles["📄 External Files<br/>CSV & JSON"]:::source
+end
+
+%% =====================================================
+%% 2. INGESTION & INTEGRATION
+%% =====================================================
+
+subgraph Integration["2️⃣ Synapse Pipelines Integration"]
+    direction TB
+
+    Copy1["🔄 Copy Data Activity<br/>API → Lake"]:::pipeline
+    Copy2["🔄 Copy Data Activity<br/>CSV → JSON"]:::pipeline
+end
+
+%% =====================================================
+%% 3. STORAGE LAYER
+%% =====================================================
+
+subgraph Storage["3️⃣ Azure Data Lake Storage Gen2"]
+    direction TB
+
+    subgraph Medallion["Retail Medallion Architecture"]
+
+        Bronze["🥉 Bronze Layer<br/>Raw Parquet"]:::bronze
+
+        Silver["🥈 Silver Layer<br/>Cleansed Parquet"]:::silver
+
+        Gold["🥇 Gold Layer<br/>Aggregated Parquet"]:::gold
+
+    end
+
+    InputOut["📦 Input / Output Containers<br/>Ad-hoc Files"]:::lake
+end
+
+%% =====================================================
+%% 4. COMPUTE LAYER
+%% =====================================================
+
+subgraph Compute["4️⃣ Synapse Compute Engines"]
+    direction TB
+
+    Spark1["⚡ Apache Spark Pool<br/>Bronze → Silver"]:::spark
+
+    Spark2["⚡ Apache Spark Pool<br/>Silver → Gold"]:::spark
+
+    ServerlessQuery["🗄️ Serverless SQL Pool<br/>OPENROWSET Queries"]:::sql
+
+    DedicatedQuery["🏢 Dedicated SQL Pool<br/>MPP Compute"]:::sql
+end
+
+%% =====================================================
+%% 5. SERVING LAYER
+%% =====================================================
+
+subgraph Serving["5️⃣ Serving & Data Warehouse"]
+    direction TB
+
+    DB_Retail["📊 retail_pc Database<br/>daily_revenue Table"]:::serve
+
+    DB_Testing["📋 testing Database<br/>employee Table"]:::serve
+end
+
+%% =====================================================
+%% 6. CONSUMPTION LAYER
+%% =====================================================
+
+subgraph Consumption["6️⃣ Consumption Layer"]
+
+    PBI["📈 Power BI / Stakeholder Reports"]:::bi
+
+end
+
+%% =====================================================
+%% MAIN RETAIL PROJECT FLOW
+%% =====================================================
+
+API -- "HTTP Linked Service" --> Copy1
+
+Copy1 -- "JSON → Parquet" --> Bronze
+
+Bronze -- "Read Raw Data" --> Spark1
+
+Spark1 -- "Cleanse & Filter Purchases" --> Silver
+
+Silver -- "Read Clean Data" --> Spark2
+
+Spark2 -- "Aggregate Revenue Metrics" --> Gold
+
+Gold -- "External Table Mapping" --> DB_Retail
+
+DB_Retail -- "T-SQL Queries" --> PBI
+
+%% =====================================================
+%% MINI PRACTICAL FLOW
+%% =====================================================
+
+ExtFiles -- "Linked Service" --> Copy2
+
+Copy2 -- "Format Conversion" --> InputOut
+
+InputOut -- "Ad-hoc File Querying" --> ServerlessQuery
+
+ServerlessQuery -- "Query Results" --> PBI
+
+InputOut -- "Load Data" --> DedicatedQuery
+
+DedicatedQuery -- "Create External Table" --> DB_Testing
+
+%% =====================================================
+%% STYLING
+%% =====================================================
+
+classDef source fill:#f5f5f5,stroke:#424242,stroke-width:2px,color:#000;
+classDef pipeline fill:#e3f2fd,stroke:#1e88e5,stroke-width:2px,color:#000;
+classDef lake fill:#e0f7fa,stroke:#00838f,stroke-width:2px,color:#000;
+
+classDef bronze fill:#d7ccc8,stroke:#6d4c41,stroke-width:2px,color:#000;
+classDef silver fill:#cfd8dc,stroke:#546e7a,stroke-width:2px,color:#000;
+classDef gold fill:#fff8e1,stroke:#ffb300,stroke-width:2px,color:#000;
+
+classDef spark fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000;
+
+classDef sql fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#000;
+
+classDef serve fill:#fce4ec,stroke:#d81b60,stroke-width:2px,color:#000;
+
+classDef bi fill:#fffde7,stroke:#f9a825,stroke-width:2px,color:#000;
+```
+
 
 ---
 
