@@ -1188,8 +1188,8 @@ SELECT * FROM daily_revenue;
 
 **Subhiksha K**
 
-* LinkedIn: [https://linkedin.com/in/your-profile]([https://linkedin.com/in/your-profile](https://www.linkedin.com/in/subhiksha-kumareswaran/))
-* GitHub: [https://github.com/your-username](https://github.com/SubhikshaK1)
+* LinkedIn: [https://linkedin.com/in/subhiksha-kumareswaran]([https://linkedin.com/in/subhiksha-kumareswaran](https://www.linkedin.com/in/subhiksha-kumareswaran/))
+* GitHub: [https://github.com/SubhikshaK1](https://github.com/SubhikshaK1)
 
 ---
 
